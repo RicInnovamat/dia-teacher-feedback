@@ -984,3 +984,174 @@ button{ font-family:inherit; }
 .swatch-teal{ background:linear-gradient(135deg,#108478 60%,#FCF7EA 60%); }
 .swatch-ocean{ background:linear-gradient(135deg,#1D5A8F 60%,#F3F7F6 60%); }
 .swatch-warm{ background:linear-gradient(135deg,#A15E22 60%,#FCF7EA 60%); }
+
+/* ═════ MOBILE RESPONSIVE ═════ */
+@media (max-width: 768px) {
+
+  /* Top bar */
+  .topbar {
+    padding: 0 16px;
+    height: 56px;
+  }
+  .topbar .who span { display: none; }
+
+  /* Stepper — mostra solo numero + label dello step corrente */
+  .stepper {
+    padding: 10px 16px;
+    top: 56px;
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+  .stepper-inner {
+    min-width: max-content;
+  }
+  .step .label {
+    display: none;
+  }
+  .step.current .label {
+    display: block;
+  }
+  .connector {
+    min-width: 20px;
+  }
+
+  /* Main layout */
+  .main {
+    padding: 20px 16px 60px;
+  }
+
+  /* Page head */
+  .page-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .page-head h1 {
+    font-size: 24px;
+  }
+  .page-head .lede {
+    font-size: 14px;
+  }
+
+  /* Goals grid — 1 colonna */
+  .goals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Lesson layout — stack verticale */
+  .lesson-layout {
+    grid-template-columns: 1fr;
+  }
+  .lesson-hero {
+    padding: 20px;
+  }
+  .lesson-hero .row {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .lesson-hero .label {
+    width: auto;
+  }
+
+  /* Upload grid — stack verticale */
+  .upload-grid {
+    grid-template-columns: 1fr;
+  }
+  .dropzone {
+    padding: 40px 20px;
+  }
+
+  /* Dashboard grid — tutto full width */
+  .span-6, .span-8, .span-4 {
+    grid-column: span 12;
+  }
+
+  /* Goal banner */
+  .goal-banner {
+    padding: 20px;
+    gap: 16px;
+  }
+  .goal-banner .banner-title {
+    font-size: 18px;
+  }
+
+  /* Bar chart label */
+  .bar-row {
+    grid-template-columns: 100px 1fr 50px;
+    gap: 8px;
+  }
+
+  /* Insights layout — stack verticale, TOC in fondo */
+  .insights-layout {
+    grid-template-columns: 1fr;
+  }
+  .insights-toc {
+    position: static;
+    order: 2;
+  }
+
+  /* TRU rows — stack verticale */
+  .tru-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  /* Moment cards */
+  .moment-card {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  /* Page nav */
+  .page-nav {
+    margin-top: 24px;
+  }
+
+  /* Tweaks panel */
+  .tweaks-panel {
+    bottom: 12px;
+    right: 12px;
+    width: 220px;
+  }
+
+  /* Quote cards */
+  .quote-card {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .quote-card .q-tag {
+    flex-direction: row;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding-right: 0;
+    padding-bottom: 8px;
+    min-width: auto;
+  }
+
+  /* Heatmap — meno colonne */
+  .heatmap {
+    grid-template-columns: repeat(7, 1fr);
+  }
+}
+
+/* Tablet intermedio */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .lesson-layout,
+  .upload-grid {
+    grid-template-columns: 1fr 260px;
+  }
+  .insights-layout {
+    grid-template-columns: 1fr 240px;
+  }
+  .span-6 {
+    grid-column: span 6;
+  }
+  .span-8 {
+    grid-column: span 12;
+  }
+  .span-4 {
+    grid-column: span 6;
+  }
+}
