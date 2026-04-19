@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>DIA Teacher Reflection</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/styles.css?v=2"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="src/data.js?v=1"></script>
+<script type="text/babel" src="src/widgets.jsx?v=2"></script>
+<script type="text/babel" src="src/screens.jsx?v=1"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+const TWEAKS = /*EDITMODE-BEGIN*/{
+  "palette": "teal",
+  "density": "normal"
+}/*EDITMODE-END*/;
+
+function applyTweaks(t){
+  document.documentElement.setAttribute('data-palette', t.palette);
+  document.documentElement.setAttribute('data-density', t.density);
+}
+
+function TopBar(){
+  return (
+    <div className="topbar">
+      <div className="brand">
+        <div className="brand-mark">DIA</div>
+        <span>Teacher Reflection</span>
+      </div>
+      <div className="spacer"/>
+      <div className="who">
+        <span>{SESSION.teacher} · {SESSION.school}</span>
+        <div className="avatar">ER</div>
+      </div>
+    </div>
+  );
+}
+
+function Stepper({ step, go }){
+  const labels = ['Set focus', 'Lesson', 'Upload', 'Analysis', 'Dashboard', 'Key insights'];
+  return (
+    <div className="stepper">
+      <div className="stepper-inner">
+        {labels.map((l, i) => (
+          <React.Fragment key={i}>
+            <div className={`step ${i < step ? 'done' : i === step ? 'current' : ''}`}
+              onClick={() => go(i)}
+              style={{ cursor: 'pointer' }}>
+              <div className="num"><span className="num-text">{i+1}</span></div>
+              <div className="label">{l}</div>
+            </div>
+            {i < labels.length - 1 && <div className="connector"/>}
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TweaksPanel({ tweaks, setTweaks, visible }){
+  if (!visible) return null;
+  const set = (k, v) => {
+    const next = { ...tweaks, [k]: v };
+    setTweaks(next);
+    applyTweaks(next);
+    window.parent.postMessage({ type:'__edit_mode_set_keys', edits:{ [k]: v } }, '*');
+  };
+  return (
+    <div className="tweaks-panel">
+      <h4>Tweaks</h4>
+      <div className="tweak-row">
+        <label>Palette</label>
+        <div className="swatch-row">
+          {['teal','ocean','warm'].map(p => (
+            <button key={p} className={`swatch-${p} ${tweaks.palette===p?'active':''}`}
+              onClick={() => set('palette', p)} title={p}/>
+          ))}
+        </div>
+      </div>
+      <div className="tweak-row">
+        <label>Density</label>
+        <div className="seg-ctrl">
+          {['compact','normal','airy'].map(v => (
+            <button key={v} className={tweaks.density===v?'active':''} onClick={() => set('density', v)}>{v}</button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App(){
+  const [tweaks, setTweaks] = useState(TWEAKS);
+  const [editMode, setEditMode] = useState(false);
+  const [step, setStep] = useState(() => {
+    const s = localStorage.getItem('dia-step');
+    return s ? Math.max(0, Math.min(5, parseInt(s))) : 0;
+  });
+  const [chosen, setChosen] = useState(() => localStorage.getItem('dia-goal') || 'wait');
+  const [file, setFile] = useState(null);
+
+  useEffect(() => { localStorage.setItem('dia-step', String(step)); }, [step]);
+  useEffect(() => { if (chosen) localStorage.setItem('dia-goal', chosen); }, [chosen]);
+
+  useEffect(() => {
+    applyTweaks(TWEAKS);
+    const handler = (e) => {
+      if (!e.data || !e.data.type) return;
+      if (e.data.type === '__activate_edit_mode') setEditMode(true);
+      if (e.data.type === '__deactivate_edit_mode') setEditMode(false);
+    };
+    window.addEventListener('message', handler);
+    window.parent.postMessage({ type:'__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  const go = (n) => setStep(Math.max(0, Math.min(5, n)));
+  const next = () => go(step + 1);
+  const back = () => go(step - 1);
+  const restart = () => { go(0); setFile(null); };
+
+  return (
+    <>
+      <TopBar/>
+      <Stepper step={step} go={go}/>
+      <div className="main">
+        <div className="content" data-screen-label={`0${step+1} ${['Goal','Lesson','Upload','Analysis','Dashboard','Insights'][step]}`}>
+          {step===0 && <GoalScreen chosen={chosen} setChosen={setChosen} next={next}/>}
+          {step===1 && <LessonScreen chosen={chosen} next={next} back={back}/>}
+          {step===2 && <UploadScreen next={next} back={back} file={file} setFile={setFile}/>}
+          {step===3 && <AnalysisScreen next={next} chosen={chosen}/>}
+          {step===4 && <DashboardScreen chosen={chosen} next={next} back={back}/>}
+          {step===5 && <InsightsScreen back={back} restart={restart}/>}
+        </div>
+      </div>
+      <TweaksPanel tweaks={tweaks} setTweaks={setTweaks} visible={editMode}/>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
